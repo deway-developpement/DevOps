@@ -1,14 +1,59 @@
 sudo apt-get update
 sudo apt-get install -y curl
 
-# Install Jenkins
-curl -fsSL https://pkg.jenkins.io/debian/jenkins.io.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
-
-echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y jenkins
+# Disable Apache2
+sudo systemctl stop apache2
+sudo systemctl disable apache2
 
 # Install Gitlab
 curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
-sudo EXTERNAL_URL="http://gitlab.example.com" apt-get install -y gitlab-ce
+sudo EXTERNAL_URL="http://localhost" apt-get install -y gitlab-ce
 
+# Configure Gitlab
+sudo gitlab-ctl reconfigure
+
+# Enable and start Gitlab service
+sudo systemctl enable gitlab-runsvdir
+sudo systemctl start gitlab-runsvdir
+
+# Print Gitlab status
+sudo gitlab-ctl status
+# Print Gitlab version
+gitlab_version=$(gitlab-rake gitlab:env:info | grep "GitLab version" | awk '{print $3}')
+echo "GitLab version: $gitlab_version"
+# Print Gitlab URL
+echo "GitLab is running at http://localhost"
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+# Add user to Docker group
+sudo usermod -aG docker $USER
+# Enable and start Docker service
+sudo systemctl enable docker
+sudo systemctl start docker
+# Print Docker version
+docker_version=$(docker --version | awk '{print $3}')
+echo "Docker version: $docker_version"
+
+# Install Docker Compose
+sudo apt-get install -y docker-compose
+# Print Docker Compose version
+docker_compose_version=$(docker-compose --version | awk '{print $3}')
+echo "Docker Compose version: $docker_compose_version"
+
+
+# Create a bitwarden gitlab project
+gitlab_project_name="bitwarden"
+gitlab_project_description="Bitwarden project for secure password management"
+
+# Get token from gitlab rails console
+gitlab_token=$(sudo gitlab-rails runner 'token = Gitlab::CurrentSettings.current_application_settings.runners_registration_token; puts token')
+echo "GitLab registration token: $gitlab_token"
+
+# Create a new project using GitLab API
+curl --request POST "http://localhost/api/v4/projects" \
+     --header "PRIVATE-TOKEN: $gitlab_token" \
+     --form "name=$gitlab_project_name" \
+     --form "description=$gitlab_project_description" \
+     --form "visibility=private"
