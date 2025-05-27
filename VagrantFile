@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
             myvm.vm.provider "utm" do |prov|
                 prov.name = "debian_vm"
                 prov.memory = "8192"   # 8GB memory
-                prov.cpus = 4          # 4 CPUs
+                prov.cpus = 8          # 8 CPUs
                 prov.directory_share_mode = "virtFS"
             end
         end
