@@ -48,7 +48,8 @@ gitlab_project_name="bitwarden"
 gitlab_project_description="Bitwarden project for secure password management"
 
 # Get token from gitlab rails console
-gitlab_token=$(sudo gitlab-rails runner 'token = User.find_by_username("root").impersonation_tokens.create!(name: "auto-token", scopes: [:api], expires_at: 1.year.from_now); puts token.token')
+gitlab_token=$(sudo gitlab-rails runner 'token = Gitlab::CurrentSettings.current_application_settings.runners_registration_token; puts token')
+echo "GitLab registration token: $gitlab_token"
 
 # Create a new project using GitLab API
 curl --request POST "http://localhost/api/v4/projects" \
