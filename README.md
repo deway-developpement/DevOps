@@ -1,18 +1,7 @@
 # DevOps
 GitHub space for DevOps project
 
-Set the environment variable in order for the vagrantfile to know your OS:
-For mac/Linux:
-```bash
-export OS_type=mac
-```
+Depending on your host machine's OS, start one of the commands:
+- `vagrant up windows`
+- Or `vagrant up macos`
 
-For Windows CMD:
-```cmd
-set OS_TYPE=windows
-```
-
-For Windows Powershell:
-```powershell
-$env:OS_TYPE="windows"
-```
