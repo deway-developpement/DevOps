@@ -1,5 +1,9 @@
+# Vagrantfile for setting up a Windows and macOS VM using Vagrant
+param = ARGV.find { |arg| arg.start_with?('-os=') }
+os_type = param ? param.split('=').last : 'default'
+
 Vagrant.configure("2") do |config|
-    if Vagrant::Util::Platform.windows?
+    if Vagrant::Util::Platform.windows? || os_type == 'windows'
         config.vm.define "windows" do |myvm|
             # Windows-specific settings
             myvm.vm.box = "hashicorp/bionic64"
@@ -8,22 +12,24 @@ Vagrant.configure("2") do |config|
                 prov.cpus = 4        # 4 CPUs
             end
         end
-    elsif Vagrant::Util::Platform.mac?
+    else
+        # Default to macOS if not specified
         config.vm.define "macos" do |myvm|
-            # macOS-specific settings
-            myvm.vm.box = "utm/debian11"
-            myvm.vm.provider "utm" do |prov|
-                prov.name = "debian_vm"
-                prov.memory = "8192"   # 8GB memory
-                prov.cpus = 8          # 8 CPUs
-                prov.directory_share_mode = "virtFS"
+            myvm.vm.box = "utm/debian11"  # Use a Debian box for Mac
+
+            # Set VM properties for UTM
+            myvm.vm.provider "utm" do |u|
+                u.name = "debian_vm"
+                u.memory = "8192"   # 8GB memory
+                u.cpus = 8          # 8 CPUs
+                u.directory_share_mode = "virtFS"
             end
         end
     end
 
-  # Provisioning all requirements using a shell script
-  config.vm.provision "shell", path: "provision.sh"
+    # Provisioning all requirements using a shell script
+    config.vm.provision "shell", path: "provision.sh"
 
-  # Forward port 80 from the VM to the host for bitwarden
-  config.vm.network "forwarded_port", guest: 80, host: 80
+    # Forward port 80 from the VM to the host for bitwarden
+    config.vm.network "forwarded_port", guest: 80, host: 80
 end
