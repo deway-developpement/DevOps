@@ -1,20 +1,19 @@
-# Check for the '-os' argument passed to Vagrant
-param = ARGV.find { |arg| arg.start_with?('-os=') }
-os_type = param ? param.split('=').last : 'default'
+# Fetch the custom OS type from the environment variable
+puts "OS Type: #{ENV['OS_TYPE']}"
+os_type = ENV['OS_TYPE'] || 'default'
 
 Vagrant.configure("2") do |config|
-
   case os_type
   when 'windows'
-    config.vm.box = "base"  # Use a "base" box for Windows
-
+    config.vm.box = "hashicorp/bionic64"
+    
     # Set VM properties for Windows
     config.vm.provider "virtualbox" do |vb|
       vb.memory = "1024"
     end
   else
     config.vm.box = "utm/debian11"  # Use a Debian box for Mac
-
+    
     # Set VM properties for UTM
     config.vm.provider "utm" do |u|
       u.name = "debian_vm"
