@@ -1,27 +1,26 @@
-# Fetch the custom OS type from the environment variable
-puts "OS Type: #{ENV['OS_TYPE']}"
-os_type = ENV['OS_TYPE'] || 'default'
+# Do `vagrant up windows` or `vagrant up macos` to start the respective VM
 
 Vagrant.configure("2") do |config|
-  case os_type
-  when 'windows'
-    config.vm.box = "hashicorp/bionic64"
-    
-    # Set VM properties for Windows
-    config.vm.provider "virtualbox" do |vb|
-      vb.memory = "1024"
+    config.vm.define "windows" do |myvm|
+        myvm.vm.box = "hashicorp/bionic64" 
+
+        # Set VM properties for Windows
+        myvm.vm.provider "virtualbox" do |vb|
+            vb.memory = "1024"
+        end
     end
-  else
-    config.vm.box = "utm/debian11"  # Use a Debian box for Mac
-    
-    # Set VM properties for UTM
-    config.vm.provider "utm" do |u|
-      u.name = "debian_vm"
-      u.memory = "4096"   # 4GB memory
-      u.cpus = 4          # 4 CPUs
-      u.directory_share_mode = "virtFS"
+
+    config.vm.define "macos" do |myvm|
+        myvm.vm.box = "utm/debian11"  # Use a Debian box for Mac
+
+        # Set VM properties for UTM
+        myvm.vm.provider "utm" do |u|
+            u.name = "debian_vm"
+            u.memory = "4096"   # 4GB memory
+            u.cpus = 4          # 4 CPUs
+            u.directory_share_mode = "virtFS"
+        end
     end
-  end
 
   # Provisioning all requirements using a shell script
   config.vm.provision "shell", path: "provision.sh"
