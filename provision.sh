@@ -53,6 +53,7 @@ gitlab_project_name="bitwarden"
 gitlab_project_description="Bitwarden project for secure password management"
 
 # Generate a random token for GitLab API access
+token_name="automation_token"
 token_string="outgoing-affix-trustless-hubcap-borax"
 token=$(openssl rand -base64 32 | tr -d '/+' | cut -c1-32)
 scopes="'api', 'sudo'"
@@ -61,7 +62,7 @@ scopes="'api', 'sudo'"
 echo "Generated token: $token"
 
 # Get token from gitlab rails console
-export gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: 'Automation token',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
+export gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: '$token_name',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
 
 # Print the GitLab token
 echo "GitLab token: $gitlab_token"
@@ -72,6 +73,34 @@ curl --request POST "http://localhost/api/v4/projects" \
      --form "name=$gitlab_project_name" \
      --form "description=$gitlab_project_description" \
      --form "visibility=private"
+
+# Clone the Bitwarden repository into the newly created project
+sudo -i
+git clone https://github.com/bitwarden/server.git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+
+# Change ownership of the repository to GitLab user
+chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+
+# Push the Bitwarden repository contents to the GitLab project
+cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+git remote set-url origin "http://$(whoami):$token@localhost/$(whoami)/$gitlab_project_name.git"
+git push -u origin --all
+
+echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
+
+# Clone the Bitwarden repository into the newly created project
+sudo -i
+git clone https://github.com/bitwarden/server.git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+
+# Change ownership of the repository to GitLab user
+chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+
+# Push the Bitwarden repository contents to the GitLab project
+cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+git remote set-url origin "http://$(whoami):$token@localhost/$(whoami)/$gitlab_project_name.git"
+git push -u origin --all
+
+echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
 
 
 # Create a new GitLab instance runner
@@ -84,12 +113,14 @@ curl --request POST \
 
 # Send the GitLab Runner token to the other VM
 sudo apt-get install -y sshpass  # for SSH authentication via password
-sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/gitlab/runner_access_token.txt
+# send the file with "scp" via SSH (using the password "vagrant" for authentication), 
+# without checking the host key, 
+# at the destination path "~/gitlab/runner_access_token.txt" on the other VM
+sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/gitlab/runner_access_token.txt 
 
 
 
-
-# par la suite, il faudra créer un serveur de production. au choix : 
+# pour le tp3, il faudra créer un serveur de production. Au choix : 
 # - 3e vm
 # - static
 # - docker file push puis récupéré dans vm2
