@@ -1,3 +1,5 @@
+export windows2=192.168.56.11
+
 sudo apt-get update
 sudo apt-get install -y curl
 
@@ -67,3 +69,25 @@ curl --request POST "http://localhost/api/v4/projects" \
      --form "name=$gitlab_project_name" \
      --form "description=$gitlab_project_description" \
      --form "visibility=private"
+
+
+# Create a new GitLab instance runner
+# and get the access token from the JSON response
+sudo apt-get install jq -y  # for parsing JSON
+curl --request POST \
+  --header "PRIVATE-TOKEN: $gitlab_token" \
+  --data "runner_type=instance_type" \
+  --url "https://gitlab.example.com/api/v4/user/runners" | jq '.token' > /tmp/gitlab_runner_token.txt
+
+# Send the GitLab Runner token to the other VM
+sudo apt-get install -y sshpass  # for SSH authentication via password
+# TODO: fix sending the token
+sshpass -p "vagrant" scp -o StrictHostKeyChecking=no /tmp/gitlab_runner_token.txt vagrant@192.168.56.11:/tmp/gitlab_runner_token.txt
+
+
+
+
+# par la suite, il faudra créer un serveur de production. au choix : 
+# - 3e vm
+# - static
+# - docker file push puis récupéré dans vm2
