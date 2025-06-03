@@ -48,6 +48,7 @@ gitlab_project_name="bitwarden"
 gitlab_project_description="Bitwarden project for secure password management"
 
 # Generate a random token for GitLab API access
+token_name="automation_token"
 token_string="outgoing-affix-trustless-hubcap-borax"
 token=$(openssl rand -base64 32 | tr -d '/+' | cut -c1-32)
 scopes="'api', 'sudo'"
@@ -56,7 +57,7 @@ scopes="'api', 'sudo'"
 echo "Generated token: $token"
 
 # Get token from gitlab rails console
-gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: 'Automation token',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
+gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: '$token_name',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
 
 # Print the GitLab token
 echo "GitLab token: $gitlab_token"
@@ -67,3 +68,17 @@ curl --request POST "http://localhost/api/v4/projects" \
      --form "name=$gitlab_project_name" \
      --form "description=$gitlab_project_description" \
      --form "visibility=private"
+
+# Clone the Bitwarden repository into the newly created project
+sudo -i
+git clone https://github.com/bitwarden/server.git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+
+# Change ownership of the repository to GitLab user
+chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+
+# Push the Bitwarden repository contents to the GitLab project
+cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
+git remote set-url origin "http://$(whoami):$token@localhost/$(whoami)/$gitlab_project_name.git"
+git push -u origin --all
+
+echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
