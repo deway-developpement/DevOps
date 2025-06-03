@@ -8,8 +8,8 @@ Vagrant.configure("2") do |config|
             # Windows-specific settings
             myvm.vm.box = "hashicorp/bionic64"
             myvm.vm.provider "virtualbox" do |prov|
-                prov.memory = "8192" # 8GB memory
-                prov.cpus = 4        # 4 CPUs
+                prov.memory = "6144" # 6GB memory
+                prov.cpus = 3        # 3 CPUs
             end
         end
     else
@@ -20,8 +20,8 @@ Vagrant.configure("2") do |config|
             # Set VM properties for UTM
             myvm.vm.provider "utm" do |u|
                 u.name = "debian_vm"
-                u.memory = "8192"   # 8GB memory
-                u.cpus = 8          # 8 CPUs
+                u.memory = "6144"   # 6GB memory
+                u.cpus = 6          # 6 CPUs
                 u.directory_share_mode = "virtFS"
             end
         end
