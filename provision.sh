@@ -44,6 +44,9 @@ sudo apt-get install -y docker-compose
 docker_compose_version=$(docker-compose --version | awk '{print $3}')
 echo "Docker Compose version: $docker_compose_version"
 
+# Create a directory for GitLab 
+mkdir -p ~/gitlab
+
 
 # Create a bitwarden gitlab project
 gitlab_project_name="bitwarden"
@@ -58,7 +61,7 @@ scopes="'api', 'sudo'"
 echo "Generated token: $token"
 
 # Get token from gitlab rails console
-gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: 'Automation token',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
+export gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: 'Automation token',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
 
 # Print the GitLab token
 echo "GitLab token: $gitlab_token"
@@ -77,12 +80,11 @@ sudo apt-get install jq -y  # for parsing JSON
 curl --request POST \
   --header "PRIVATE-TOKEN: $gitlab_token" \
   --data "runner_type=instance_type" \
-  --url "https://gitlab.example.com/api/v4/user/runners" | jq '.token' > /tmp/gitlab_runner_token.txt
+  --url "https://gitlab.example.com/api/v4/user/runners" | jq '.token' > ~/gitlab/runner_access_token.txt
 
 # Send the GitLab Runner token to the other VM
 sudo apt-get install -y sshpass  # for SSH authentication via password
-# TODO: fix sending the token
-sshpass -p "vagrant" scp -o StrictHostKeyChecking=no /tmp/gitlab_runner_token.txt vagrant@192.168.56.11:/tmp/gitlab_runner_token.txt
+sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/gitlab/runner_access_token.txt
 
 
 
