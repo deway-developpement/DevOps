@@ -1,7 +1,7 @@
 # DevOps
+
 GitHub space for DevOps project
 
-Depending on your host machine's OS, start one of the commands:
-- `vagrant up windows`
-- Or `vagrant up macos`
+Start one of the commands to create and run the VM:
 
+- `vagrant up`

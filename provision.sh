@@ -50,7 +50,7 @@ gitlab_project_description="Bitwarden project for secure password management"
 # Generate a random token for GitLab API access
 token_string="outgoing-affix-trustless-hubcap-borax"
 token=$(openssl rand -base64 32 | tr -d '/+' | cut -c1-32)
-scopes="'api', 'sudo', 'ai_features', 'manage_runner'"
+scopes="'api', 'sudo'"
 
 # Print the generated token
 echo "Generated token: $token"
