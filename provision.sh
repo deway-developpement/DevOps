@@ -1,3 +1,5 @@
+export windows2=192.168.56.11
+
 sudo apt-get update
 sudo apt-get install -y curl
 
@@ -42,6 +44,9 @@ sudo apt-get install -y docker-compose
 docker_compose_version=$(docker-compose --version | awk '{print $3}')
 echo "Docker Compose version: $docker_compose_version"
 
+# Create a directory for GitLab 
+mkdir -p ~/gitlab
+
 
 # Create a bitwarden gitlab project
 gitlab_project_name="bitwarden"
@@ -57,7 +62,7 @@ scopes="'api', 'sudo'"
 echo "Generated token: $token"
 
 # Get token from gitlab rails console
-gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: '$token_name',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
+export gitlab_token=$(sudo gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: [$scopes],name: '$token_name',expires_at: 365.days.from_now); token.set_token('$token'); token.save!; puts token.token")
 
 # Print the GitLab token
 echo "GitLab token: $gitlab_token"
@@ -82,3 +87,26 @@ git remote set-url origin "http://$(whoami):$token@localhost/$(whoami)/$gitlab_p
 git push -u origin --all
 
 echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
+
+
+# Create a new GitLab instance runner
+# and get the access token from the JSON response
+sudo apt-get install jq -y  # for parsing JSON
+curl --request POST \
+  --header "PRIVATE-TOKEN: $gitlab_token" \
+  --data "runner_type=instance_type" \
+  --url "https://gitlab.example.com/api/v4/user/runners" | jq '.token' > ~/gitlab/runner_access_token.txt
+
+# Send the GitLab Runner token to the other VM
+sudo apt-get install -y sshpass  # for SSH authentication via password
+# send the file with "scp" via SSH (using the password "vagrant" for authentication), 
+# without checking the host key, 
+# at the destination path "~/gitlab/runner_access_token.txt" on the other VM
+sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/gitlab/runner_access_token.txt 
+
+
+
+# pour le tp3, il faudra créer un serveur de production. Au choix : 
+# - 3e vm
+# - static
+# - docker file push puis récupéré dans vm2

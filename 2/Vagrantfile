@@ -4,33 +4,34 @@ os_type = param ? param.split('=').last : 'default'
 
 Vagrant.configure("2") do |config|
     if Vagrant::Util::Platform.windows? || os_type == 'windows'
-        config.vm.define "windows" do |myvm|
+        config.vm.define "windows2" do |myvm|
             # Windows-specific settings
-            myvm.vm.box = "hashicorp/bionic64"
+            config.vm.box = "generic/debian12"
+            config.vm.box_version = "4.3.12"
             myvm.vm.provider "virtualbox" do |prov|
-                prov.memory = "6144" # 6GB memory
-                prov.cpus = 3        # 3 CPUs
+                prov.memory = "1024"
+                prov.cpus = 1   
             end
         end
     else
         # Default to macOS if not specified
-        config.vm.define "macos" do |myvm|
-            myvm.vm.box = "utm/debian11"  # Use a Debian box for Mac
+        config.vm.define "macos2" do |myvm|
+            myvm.vm.box = "utm/debian11" 
 
             # Set VM properties for UTM
             myvm.vm.provider "utm" do |u|
                 u.name = "debian_vm"
-                u.memory = "6144"   # 6GB memory
-                u.cpus = 6          # 6 CPUs
+                u.memory = "1024"   
+                u.cpus = 1          
                 u.directory_share_mode = "virtFS"
             end
         end
     end
 
     # Provisioning all requirements using a shell script
-    config.vm.provision "shell", path: "provision.sh"
+    config.vm.provision "shell", path: "worker.sh"
 
     # Create networks between the VM and the host, and between the VMs
-    config.vm.network "forwarded_port", guest: 80, host: 80
-    config.vm.network "private_network", ip: "192.168.56.10"
+    config.vm.network "forwarded_port", guest: 80, host: 8080
+    config.vm.network "private_network", ip: "192.168.56.11"
 end
