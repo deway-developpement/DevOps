@@ -1,4 +1,4 @@
-export windows2=192.168.56.11
+export vm2=192.168.56.11
 
 sudo apt-get update
 sudo apt-get install -y curl
@@ -95,14 +95,14 @@ sudo apt-get install jq -y  # for parsing JSON
 curl --request POST \
   --header "PRIVATE-TOKEN: $gitlab_token" \
   --data "runner_type=instance_type" \
-  --url "https://gitlab.example.com/api/v4/user/runners" | jq '.token' > ~/gitlab/runner_access_token.txt
+  --url "http://localhost/api/v4/user/runners" | jq '.token' > ~/gitlab/runner_access_token.txt
 
 # Send the GitLab Runner token to the other VM
 sudo apt-get install -y sshpass  # for SSH authentication via password
 # send the file with "scp" via SSH (using the password "vagrant" for authentication), 
 # without checking the host key, 
 # at the destination path "~/gitlab/runner_access_token.txt" on the other VM
-sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/gitlab/runner_access_token.txt 
+sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/runner_access_token.txt 
 
 
 

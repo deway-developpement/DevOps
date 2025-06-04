@@ -54,10 +54,13 @@ sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/
 sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
 sudo gitlab-runner start
 
-# Await file containing the runner access token to be created by the other box 
-echo "Waiting for ~/runner_access_token.txt to be created..."
-while [ ! -f ~/runner_access_token.txt ]; do
-    sleep 2
+# Use inotifywait to await the access token
+echo "Waiting for runner_access_token.txt to be created or modified..."
+inotifywait -m -e create -e modify ~ | while read path action file; do
+    if [ "$file" = "runner_access_token.txt" ]; then
+        echo "File $file was created or modified in $path"
+        break
+    fi
 done
 
 # Register the GitLab Runner, using the token from the file created by the other box
