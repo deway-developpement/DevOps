@@ -88,20 +88,6 @@ git push -u origin --all
 
 echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
 
-# Clone the Bitwarden repository into the newly created project
-sudo -i
-git clone https://github.com/bitwarden/server.git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
-
-# Change ownership of the repository to GitLab user
-chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
-
-# Push the Bitwarden repository contents to the GitLab project
-cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git
-git remote set-url origin "http://$(whoami):$token@localhost/$(whoami)/$gitlab_project_name.git"
-git push -u origin --all
-
-echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
-
 
 # Create a new GitLab instance runner
 # and get the access token from the JSON response
