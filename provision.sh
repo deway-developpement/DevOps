@@ -92,10 +92,9 @@ echo "GitLab project '$gitlab_project_name' has been created and initialized wit
 # Create a new GitLab instance runner
 # and get the access token from the JSON response
 sudo apt-get install jq -y  # for parsing JSON
-curl --request POST \
+curl --request POST "http://localhost/api/v4/user/runners" \
   --header "PRIVATE-TOKEN: $gitlab_token" \
-  --data "runner_type=instance_type" \
-  --url "http://localhost/api/v4/user/runners" | jq '.token' > ~/gitlab/runner_access_token.txt
+  --form "runner_type=instance_type" | jq '.token' > ~/gitlab/runner_access_token.txt
 
 # Send the GitLab Runner token to the other VM
 sudo apt-get install -y sshpass  # for SSH authentication via password

@@ -55,6 +55,7 @@ sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab
 sudo gitlab-runner start
 
 # Use inotifywait to await the access token
+# TODO: inotify does not handle updates made externally (including from the first box), change to a different method 
 echo "Waiting for runner_access_token.txt to be created or modified..."
 inotifywait -m -e create -e modify ~ | while read path action file; do
     if [ "$file" = "runner_access_token.txt" ]; then
