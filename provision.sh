@@ -101,7 +101,7 @@ sudo apt-get install -y sshpass  # for SSH authentication via password
 # send the file with "scp" via SSH (using the password "vagrant" for authentication), 
 # without checking the host key, 
 # at the destination path "~/gitlab/runner_access_token.txt" on the other VM
-sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@192.168.56.11:~/runner_access_token.txt 
+sshpass -p "vagrant" scp -o StrictHostKeyChecking=no ~/gitlab/runner_access_token.txt vagrant@$vm2:~/runner_access_token.txt && echo "File sent to $vm2"
 
 
 

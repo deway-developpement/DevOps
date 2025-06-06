@@ -54,15 +54,15 @@ sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/
 sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
 sudo gitlab-runner start
 
+if [ ! -f /home/vagrant/runner_access_token.txt ]; then
+    echo "Waiting for runner_access_token.txt to be created or modified..."
 # Use inotifywait to await the access token
-# TODO: inotify does not handle updates made externally (including from the first box), change to a different method 
-echo "Waiting for runner_access_token.txt to be created or modified..."
-inotifywait -m -e create -e modify ~ | while read path action file; do
+    inotifywait -m -e create -e modify /home/vagrant | while read path action file; do
     if [ "$file" = "runner_access_token.txt" ]; then
-        echo "File $file was created or modified in $path"
         break
     fi
 done
+fi
 
 # Register the GitLab Runner, using the token from the file created by the other box
 sudo gitlab-runner register --non-interactive --url http://192.168.56.10 --executor docker --docker-image "docker:latest" --token $(cat ~/runner_access_token.txt) 
