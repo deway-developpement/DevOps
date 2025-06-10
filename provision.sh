@@ -81,9 +81,9 @@ chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project
 # Push the Bitwarden repository contents to the GitLab project
 cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
 git remote set-url origin "http://$(whoami):$token@$vm1/$(whoami)/$gitlab_project_name.git" && \
-git push -u origin --all
-
+git push -u origin --all && \
 echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
+exit  # exit from the root user
 
 
 # Create a new GitLab instance runner
