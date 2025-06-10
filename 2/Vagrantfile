@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     end
 
     # Provisioning all requirements using a shell script
-    config.vm.provision "shell", path: "worker.sh"
+    config.vm.provision "shell", path: "provision.sh"
 
     # Create networks between the VM and the host, and between the VMs
     config.vm.network "forwarded_port", guest: 80, host: 8080
