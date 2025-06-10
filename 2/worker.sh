@@ -28,11 +28,12 @@ echo "Docker Compose version: $(docker-compose --version | awk '{print $3}')"
 # Install Podman
 sudo apt-get -y install podman
 
-# Pull and run an Ubuntu container
-sudo podman run -d --name ubuntu-container -it docker.io/library/ubuntu:latest
+# TODO: uncomment the next 2 commands
+# # Pull and run an Ubuntu container
+# sudo podman run -d --name ubuntu-container -it docker.io/library/ubuntu:latest
 
-# Deploy WordPress using Podman, with port direction to guest@localhost:8080
-sudo podman run -d --name wordpress -p 8080:80 -e WORDPRESS_DB_HOST=localhost:3306 -e WORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=password -e WORDPRESS_DB_NAME=db docker.io/library/wordpress
+# # Deploy WordPress using Podman, with port direction to guest@localhost:8080
+# sudo podman run -d --name wordpress -p 8080:80 -e WORDPRESS_DB_HOST=localhost:3306 -e WORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=password -e WORDPRESS_DB_NAME=db docker.io/library/wordpress
 
 
 # Next, we will focus on the red part: 
