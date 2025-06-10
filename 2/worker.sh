@@ -1,3 +1,6 @@
+export vm1=192.168.56.10
+export vm2=192.168.56.11
+
 sudo apt-get update
 sudo apt-get install -y curl
 
@@ -41,23 +44,29 @@ sudo apt-get -y install podman
 # by registering this box as a "Docker socket agent pool" for the other box's GitLab. 
 # When the pipeline is triggered by the other box, a container will be created here to execute the job; at the end of the job, the container will be removed.
 
-# Install GitLab Runner
-# Download the binary for the system (architecture amd64)
-sudo curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+# # Install GitLab Runner
+# # Download the binary for the system (architecture amd64)
+# sudo curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
 
-# Give it permission to execute
-sudo chmod +x /usr/local/bin/gitlab-runner
+# # Give it permission to execute
+# && sudo chmod +x /usr/local/bin/gitlab-runner
 
-# Create a GitLab Runner user
-sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+# # Create a GitLab Runner user
+# && sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
 
-# Install and run as a service
-sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
-sudo gitlab-runner start
+# # Install and run as a service
+# && sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+# && sudo gitlab-runner start
+
+
+# Add the official GitLab repository
+curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash && \
+sudo apt-get install gitlab-runner -y  # Install the latest version of GitLab Runner
+
 
 if [ ! -f /home/vagrant/runner_access_token.txt ]; then
     echo "Waiting for runner_access_token.txt to be created or modified..."
-# Use inotifywait to await the access token
+    # Use inotifywait to await the access token
     inotifywait -m -e create -e modify /home/vagrant | while read path action file; do
     if [ "$file" = "runner_access_token.txt" ]; then
         break
@@ -66,5 +75,5 @@ done
 fi
 
 # Register the GitLab Runner, using the token from the file created by the other box
-sudo gitlab-runner register --non-interactive --url http://192.168.56.10 --executor docker --docker-image "docker:latest" --token $(cat ~/runner_access_token.txt) 
+sudo gitlab-runner register --non-interactive --url http://$vm1 --executor docker --docker-image "docker:latest" --token $(cat /home/vagrant/runner_access_token.txt) 
 
