@@ -74,16 +74,14 @@ curl --request POST "http://$vm1/api/v4/projects" \
      --form "visibility=private"
 
 # Clone the Bitwarden repository into the newly created project
-sudo -i
-git clone https://github.com/bitwarden/server.git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
+sudo git clone https://github.com/bitwarden/server.git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
 # Change ownership of the repository to GitLab user
-chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
+sudo chown -R git:git /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
 # Push the Bitwarden repository contents to the GitLab project
-cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
-git remote set-url origin "http://$(whoami):$token@$vm1/$(whoami)/$gitlab_project_name.git" && \
-git push -u origin --all && \
+sudo cd /var/opt/gitlab/git-data/repositories/$(whoami)/$gitlab_project_name.git && \
+sudo git remote set-url origin "http://$(whoami):$token@$vm1/$(whoami)/$gitlab_project_name.git" && \
+sudo git push -u origin --all && \
 echo "GitLab project '$gitlab_project_name' has been created and initialized with the Bitwarden repository."
-exit  # exit from the root user
 
 
 # Create a new GitLab instance runner
